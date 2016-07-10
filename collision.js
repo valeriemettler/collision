@@ -4,16 +4,22 @@
 // if box1 left === box2 left, reverse direction, if box1 top === box2 top, reverse direction,
 //3. do number 2 for n boxes
 // use classes!!
+//if absolute value( box1 top - box2 top )
+//
 
+// instead of a separate up and down, you just need to change top_chg from 1 to -1 :-) same for r/l
+//that way, you can do all for reflections in one place and don't even have to clearinterval
+var gap = 0;
 
-
-var box = function() {
+var box = function(top, left, boxid) {
     var that = this;
+    that.rendered = false;
+    that.boxid = boxid;
     that.height = 30;
     that.width = 30;
     //set initial position here
-    that.top = 100;
-    that.left = 100;
+    that.top = top;
+    that.left = left;
     that.top_chg = 1;
     that.left_chg = 1;
     that.max_left = 0;
@@ -27,113 +33,79 @@ var box = function() {
 box.prototype.event_setup = function() {
     var that = this;
     $('body').on('click', '#btn', function() {
-            that.start();
+        that.start();
+    });
+    $('body').on('click', '#btn2', function() {
+        that.stop();
     });
 };
 
 box.prototype.render = function() {
     var that = this;
-    var x = '<div class="square"></div>';
-    $('#container').html(x);
-    $('.square').css({
+    var x = '<div id="' + that.boxid + '" class="square"></div>';
+    if(!that.rendered){
+    $('#container').html( $('#container').html() + x);
+    that.rendered = true;
+    }
+    console.log(that.boxid);
+    $('#' + that.boxid).css({
         "top": that.top,
         "left": that.left,
     })
 };
 
-// box.prototype.move_down_right = function() {
-//     var that = this;
-//     //update position
-//         that.top += that.top_chg;
-//         that.left += that.left_chg;
-
-//     //check if the values of x and y are beyond the viewport dimensions, and if so, reverse the direction by setting values of top_chg and left_chg to the negative values.
-//     if (that.top > that.max_bottom || that.left > that.max_right ){
-//         clearInterval(that.timer);
-//         that.timer = setInterval(function() {
-//         that.move_up_right();
-//     }, 7);
-//     }
-
-//     that.render();
-// };
-
-
-box.prototype.move_down = function() {
+box.prototype.move = function() {
     var that = this;
-    //update position
-        that.top += that.top_chg;
-
-    //check if the values of x and y are beyond the viewport dimensions, and if so, reverse the direction by setting values of top_chg and left_chg to the negative values.
-    if (that.top > that.max_bottom){
-        clearInterval(that.timer_down);
-        that.timer_up = setInterval(function() {
-        that.move_up();
-    }, 7);
+    that.top = that.top + that.top_chg;
+    that.left = that.left + that.left_chg;
+    // console.log("that.top", that.top, "that.max_bottom", that.max_bottom, "that.max_top",that.max_top  );
+    // console.log("that.top", that.top);
+    // console.log("that.left", that.left);
+    if (that.top === that.max_bottom) { //up
+        // console.log("up", that.top + "===" + that.max_bottom);
+        that.top_chg = that.top_chg * -1;  //1 * -1 = -1
+        // that.top_chg = that.top_chg + -1; // -2 + -1 = -3
+        // console.log("up that.top_chg", that.top_chg);
+        // that.top = that.top + that.top_chg;
+        // that.render();
+    } else if (that.top === that.max_top) { //down
+        // console.log("down", that.top + "<=" + that.max_top);
+        that.top_chg = that.top_chg * -1; //-1 * -1 = 1
+        // that.top_chg = that.top_chg + -1; //-1 + -1 = -2
+        // console.log("down that.top_chg", that.top_chg);
+        // that.top = that.top + that.top_chg;
+    } else if (that.left === that.max_right) { //left
+        // console.log("left", that.left + "===" + that.max_right);
+        that.left_chg = that.left_chg * -1;  //1 * -1 = -1
+        // console.log("left that.left_chg", that.left_chg);
+        // that.left = that.left + that.left_chg;
+    } else if (that.left === that.max_left) { //right
+        // console.log("right", that.left + "===" + that.max_left);
+        that.left_chg = that.left_chg * -1; //-1 * -1 = 1
+        // console.log("right that.left_chg", that.left_chg);
+        // that.left = that.left + that.left_chg;
     }
 
     that.render();
 };
 
-box.prototype.move_right = function() {
-    var that = this;
-    //update position
-        that.left += that.left_chg;
-
-    //check if the values of x and y are beyond the viewport dimensions, and if so, reverse the direction by setting values of top_chg and left_chg to the negative values.
-    if (that.left > that.max_right ){
-        clearInterval(that.timer_right);
-        that.timer_left = setInterval(function() {
-        that.move_left();
-    }, 7);
-    }
-
-    that.render();
-};
-
-box.prototype.move_up = function() {
-    var that = this;
-    //update position
-    //s check if the values of x and y are beyond the viewport dimensions, and if so, reverse the direction by setting values of top_chg and left_chg to the negative values.
-        that.top -= that.top_chg;
-
-    if (that.top < that.max_top){
-        //console.log("that.top", that.top, "that.left", that.left, "that.max_right", that.max_right) //that.top 99 that.left 621 that.max_right 1266
-        clearInterval(that.timer_up);
-        that.timer_down = setInterval(function() {
-        that.move_down();
-    }, 7);
-    }
-
-    that.render();
-};
-
-box.prototype.move_left = function() {
-    var that = this;
-    //update position
-    //s check if the values of x and y are beyond the viewport dimensions, and if so, reverse the direction by setting values of top_chg and left_chg to the negative values.
-        that.left -= that.left_chg;
-
-    if (that.left < that.max_left ){
-        clearInterval(that.timer_left);
-        that.timer_right = setInterval(function() {
-        that.move_right();
-    }, 7);
-    }
-
-    that.render();
-};
 
 box.prototype.start = function() {
+    console.log(gap);
     var that = this;
     that.render();
-    that.timer_down = setInterval(function() {
-        that.move_down();
-    }, 7);
-    that.timer_right = setInterval(function() {
-        that.move_right();
-    }, 7);
+     console.log("that.top_chg start", that.top_chg);
+     console.log("that.left_chg start", that.left_chg);
+    that.timer = setInterval(function() {
+        that.move();
+    }, 10 );
 };
 
-var box1 = new box();
-var box2 = new box();
+box.prototype.stop = function() {
+    var that = this;
+    that.render();
+    clearInterval(that.timer);
+};
+
+var box1 = new box(0, 0, 'box1');
+var box2 = new box(0, 1058, 'box2');
